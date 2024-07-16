@@ -19,8 +19,6 @@ jobs:
       run: |
         mkdir -p ../priavte-ara-repo
         git clone https://sandesh-l:${{ secrets.PAT }}@github.com/access-ci-org/access-ara ../private-ara-repo
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT }}
         
     - name: Install rclone
       run: |
