@@ -13,7 +13,7 @@ jobs:
       with:
         ref: main
 
-    - name: Checkout private repository
+    - name: Clone private repository
       # Must clone the repo into a directory outside of the current public repo
       # This prevents overlapping directory issue with rclone (exit code 7)
       run: |
