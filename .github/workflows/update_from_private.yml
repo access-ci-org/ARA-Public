@@ -1,0 +1,46 @@
+name: Update from Private Repo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-public-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout public repository main branch
+      uses: actions/checkout@v3
+      with:
+        ref: main
+
+    - name: Checkout private repository
+      # Must clone the repo into a directory outside of the current public repo
+      # This prevents overlapping directory issue with rclone (exit code 7)
+      run: |
+        mkdir -p ../priavte-ara-repo
+        git clone https://sandesh-l:${{ secrets.PAT }}@github.com/access-ci-org/access-ara ../private-ara-repo
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+        
+    - name: Install rclone
+      run: |
+        curl https://rclone.org/install.sh | sudo bash
+
+    - name: Sync files
+      # exclude the .git directory
+      # exclude the .github directory because it would overwrite this github action as well
+      # exclude readme. Since this is a public-facing repo, it will have a different readme with less technical info
+      # Remove the private-ara-repo directory just in case it tries to push that directory as well
+      run: |
+        rclone sync ../private-ara-repo/ . --exclude='.git/**' --exclude='.github/**' --exclude='README.md'
+        rm -r ../private-ara-repo
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add .
+        git commit -m "Update from private repo"
+        git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
