@@ -268,7 +268,7 @@ def add_software():
     Add software data to the database from a CSV file and associate each software with the correct RP names.
     """
     
-    file_path = './software/combined_data.csv'
+    file_path = 'app/software/combined_data.csv'
 
     rp_name_mapping = {
         "aces": "ACES",
@@ -367,10 +367,10 @@ def add_info():
                     'blurb': r"Johns Hopkins University’s flagship cluster, Rockfish, integrates high-performance and data-intensive computing while developing tools for generating, analyzing and disseminating data sets of ever-increasing size. The cluster contains compute nodes optimized for different research projects and complex, optimized workflows.", 
                     'link': r"https://operations.access-ci.org/node/569", 
                     'documentation': r"https://xsedetoaccess.ccs.uky.edu/confluence/redirect/Rockfish+-+JHU.html"},
-                    {'rp':RPS.get(RPS.name == 'stampede-2'), 
-                    'blurb': r"Stampede2 is intended primarily for parallel applications scalable to tens of thousands of cores, as well as general purpose and throughput computing. Normal batch queues will enable users to run simulations up to 48 hours. Jobs requiring run times and more cores than allowed by the normal queues will be run in a special queue after approval of TACC staff. normal, serial and development queues are configured as well as special purpose queues.", 
-                    'link': r"https://operations.access-ci.org/node/596", 
-                    'documentation': r"https://xsedetoaccess.ccs.uky.edu/confluence/redirect/Stampede-2+-+TACC.html"},
+                    # {'rp':RPS.get(RPS.name == 'stampede-2'), 
+                    # 'blurb': r"Stampede2 is intended primarily for parallel applications scalable to tens of thousands of cores, as well as general purpose and throughput computing. Normal batch queues will enable users to run simulations up to 48 hours. Jobs requiring run times and more cores than allowed by the normal queues will be run in a special queue after approval of TACC staff. normal, serial and development queues are configured as well as special purpose queues.", 
+                    # 'link': r"https://operations.access-ci.org/node/596", 
+                    # 'documentation': r"https://xsedetoaccess.ccs.uky.edu/confluence/redirect/Stampede-2+-+TACC.html"},
                     {'rp':RPS.get(RPS.name == 'stampede-3'), 
                     'blurb': r"Stampede3 is intended primarily for parallel applications scalable to tens of thousands of cores, as well as general purpose and throughput computing. Normal batch queues will enable users to run simulations up to 48 hours.", 
                     'link': r"https://operations.access-ci.org/node/592", 
