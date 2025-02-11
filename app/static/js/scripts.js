@@ -3,7 +3,7 @@ import { fieldTagify, softwareTagify,
         addFieldTagify, addSoftwareTagify,
         fieldInWhitelist, softwareInWhitelist } from "./tags.js";
 
-import {header, siteMenus, footer, footerMenus, universalMenus} from "https://esm.sh/@access-ci/ui@0.2.5"
+import {header, siteMenus, footer, footerMenus, universalMenus} from "https://esm.sh/@access-ci/ui@0.3.1"
 
 import { showAlert } from './alerts.js';
 
