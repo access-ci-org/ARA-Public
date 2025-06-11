@@ -22,6 +22,11 @@ def validate_memory_table(table):
       return False, "Memory (RAM) table contains non-numeric values"
    return True, "Memory is valid"
 
+def validate_gpu_table(table):
+   if not validate_numeric_values(table['Vram/GPU memory (GB)']):
+      return False, "GPU table contains non-numeric values"
+   return True, "GPU is valid"
+
 def validate_suitability(table):
    # Validate values in Suitability column
    suitibalityColumn = table.columns[1]

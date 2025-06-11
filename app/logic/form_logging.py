@@ -13,6 +13,8 @@ input_handler.setFormatter(formatter)
 input_logger.addHandler(input_handler)
 
 def log_form_data(formData):
+    if not formData:
+        return
     #Q: (HPC Use)
     hpcUse = formData.get('hpc-use')
     response = swap_val_to_text(hpcUse)
@@ -47,17 +49,14 @@ def log_form_data(formData):
 
     #Q: (Fields Tags Added)
     addFields = formData.get("add-field-tags")
-    addFieldsList = addFields.split(",")
-    input_logger.info("User Input - Research Field Tags Added:\n%s", addFieldsList)
+    if addFields:
+        addFieldsList = addFields.split(",")
+        input_logger.info("User Input - Research Field Tags Added:\n%s", addFieldsList)
 
     #Q: (Storage)
     storage = formData.get("storage")
     response = swap_val_to_text(storage)
     input_logger.info("User Input - Storage Needed - %s", response)
-
-    #Q: (File Count)
-    numFiles = formData.get("num-files")
-    input_logger.info("User Input - # of Files Needed - %s", numFiles)
 
     #Q: (Long Term Storage)
     longTermStorageNeeded = formData.get("long-term-storage")
@@ -78,8 +77,9 @@ def log_form_data(formData):
 
     #Q: (Add Software)
     addSoftware = formData.get("add-software-tags")
-    addSoftwareList = addSoftware.split(",")
-    input_logger.info("User Input - Software Tags Added:\n%s", addSoftwareList)
+    if addSoftware:
+        addSoftwareList = addSoftware.split(",")
+        input_logger.info("User Input - Software Tags Added:\n%s", addSoftwareList)
 
     #Q: (Graphical Component)
     graphicsNeeded = formData.get("graphics")
@@ -91,10 +91,16 @@ def log_form_data(formData):
     response = swap_val_to_text(GPUNeeded)
     input_logger.info("User Input - GPU - %s", response)
 
-    #Q: (Always On)
-    alwaysRunningNeeded = formData.get("job-run")
-    response = swap_val_to_text(alwaysRunningNeeded)
-    input_logger.info("User Input - Always Running - %s", response)
+    #Q: (Specific GPU)
+    gpus = formData.get("gpus")
+    response = swap_val_to_text(gpus)
+    input_logger.info("User Input - Needs specific gpus - %s", response)
+
+    #Q: (Specifc GPU ram)
+    gpus_ram = formData.get("gpus_ram")
+    response = swap_val_to_text(gpus_ram)
+    input_logger.info("User Input - Needs gpus with specific ram - %s", response)
+
 
     #Q: (Virtual Machine)
     vmNeeded = formData.get("vm")

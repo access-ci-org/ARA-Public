@@ -22,13 +22,6 @@ fieldTagify = new Tagify (fieldInput, {
         }
 });
 
-//Create tagify input for "add research fields" question
-var addFieldInput = document.querySelector("input[id=field-add-tag");
-addFieldTagify = new Tagify(addFieldInput, {
-    blacklist: fieldWhitelist,
-    editTags: false
-});
-
 //Find user input in software question
 var softwareInput = document.querySelector("input[id=software-text-input]");
 softwareTagify = new Tagify (softwareInput, {
@@ -42,12 +35,24 @@ softwareTagify = new Tagify (softwareInput, {
     }
 });
 
-//Create tagify input for "add software/packages" question
-var addSoftwareInput = document.querySelector("input[id=software-libraries-add-tag]");
-addSoftwareTagify = new Tagify(addSoftwareInput, {
-    blacklist: softwareWhitelist,
-    editTags: false
-});
+export function initTagify(){
+
+    //Create tagify input for "add research fields" question
+    var addFieldInput = document.querySelector("input[id=field-add-tag");
+    addFieldTagify = new Tagify(addFieldInput, {
+        blacklist: fieldWhitelist,
+        editTags: false
+    });
+
+    //Create tagify input for "add software/packages" question
+    var addSoftwareInput = document.querySelector("input[id=software-libraries-add-tag]");
+    addSoftwareTagify = new Tagify(addSoftwareInput, {
+        blacklist: softwareWhitelist,
+        editTags: false
+    });
+
+    return {addFieldTagify, addSoftwareTagify}
+}
 
 //grab whitelist for research fields tags via AJAX
 async function getFieldWhitelist(){

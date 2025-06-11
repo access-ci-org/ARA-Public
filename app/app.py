@@ -1,18 +1,20 @@
 from flask import Flask, render_template, request, send_file, redirect, jsonify
-from dotenv import load_dotenv
 import json
 import os
 from datetime import datetime
+from collections import defaultdict
 from urllib.request import urlopen
 from .models.rps import RPS
 from .models.gui import GUI
 from .models.researchField import ResearchFields
 from .models.software import Software
 from .models.rpInfo import RpInfo
+from .models.gpu import GPU
+from .models.rpGPU import RpGPU
 from .logic.form_logging import log_form_data
 from .logic.recommendation import get_recommendations
-from .logic.reports import sanitize_and_process_reports
-from .confluence.checkPage import check_page
+from .logic.reports import sanitize_and_process_reports, save_user_report
+from .xdmod.get_xdmod_data import fetch_wait_time_by_resource
 
 app = Flask(__name__, static_folder='static')
 
@@ -22,16 +24,24 @@ def recommender_page():
     rps = RPS.select()
     research_fields = ResearchFields.select().order_by(ResearchFields.field_name)
     guis = GUI.select()
-    return render_template("questions.html", 
-                           rps = rps, 
+    gpu_obj = RpGPU.select()
+    gpus = defaultdict(list)
+    for item in gpu_obj:
+        gpus[item.gpu.gpu_name].append(item.gpu_memory)
+    # create a sorted list of memory values with no duplicates
+    gpus = {gpu: sorted(list(set(memory))) for gpu, memory in gpus.items()}
+
+    return render_template("questions.html",
+                           rps = rps,
                            research_fields = research_fields,
-                           guis = guis)
+                           guis = guis,
+                           gpus = gpus)
 
 @app.route("/get_research_fields")
 def get_research_fields():
     research_fields = ResearchFields.select().order_by(ResearchFields.field_name)
     return([field.field_name for field in research_fields])
-    
+
 @app.route("/get_software")
 def get_software():
     softwares = Software.select().order_by(Software.software_name)
@@ -44,8 +54,22 @@ def get_score():
     data = request.get_json()
     log_form_data(data)
     recommendations = get_recommendations(data)
+    # 'reasons' is a set, convert it to a list before sending it to front-end
+    for _, value in recommendations.items():
+        value['reasons'] = list(value['reasons'])
     return json.dumps(recommendations, sort_keys=True)
-    
+
+@app.route("/get_xdmod_data", methods=['POST'])
+def get_xdmod_data():
+    try:
+        wait_time = fetch_wait_time_by_resource()
+        if not wait_time.empty:
+            wait_times =  wait_time.set_index('Simplified Resource')['Wait Hours: Per Job'].round(2).to_dict()
+            return json.dumps(wait_times)
+    except Exception as e:
+        print(e)
+    return json.dumps({})
+
 # get_info function pulls from the rpInfo database to get blurbs, links, and documentation links
 @app.route("/get_info", methods=['POST'])
 def get_info():
@@ -57,54 +81,25 @@ def get_info():
         "documentation": [f"{info.documentation}" for info in info]
     }
     return blurbs_links
-    
 
-@app.route("/check_conf_page/<pageId>",methods=['GET'])
-def check_conf_page(pageId):
-    messages, pageName = check_page(pageId=pageId)
-    return render_template("check_page.html",
-                           messages=messages,
-                           pageName=pageName)
-
-@app.route("/images/<filename>")
-def get_image(filename):
-    if 'png' in filename:
-        mimetype = 'image/png'
-    elif 'svg' in filename:
-        mimetype='image/svg+xml'
-
-    return send_file(f'static/images/{filename}', mimetype=mimetype)
 
 @app.route("/report-issue", methods=['POST'])
-def report_issue():
-    issue_report = request.get_json()
+def process_feedback():
+    # Grab Ajax Request
+    user_feedback = request.get_json()
 
-    if issue_report['reportDetails']:
-        report = sanitize_and_process_reports(issue_report)
-        current_datetime = report['datetime']
+    if "userMessage" in user_feedback:
+        feedback_report = sanitize_and_process_reports(
+            user_feedback, report_type="feedback"
+        )
+        feedback_saved = save_user_report(feedback_report)
 
-        capture_data_url = report['captureDataUrl']
-        report.pop('captureDataUrl')
+        if feedback_saved:
+            return jsonify({"success": "Feedback processed successfully"})
 
-        report_folder = os.path.join('reports', current_datetime)
-        os.makedirs(report_folder, exist_ok=True)
-        report_filename = os.path.join(report_folder, 'report.json')
-        with open(report_filename, 'w') as f:
-            json.dump(report, f, indent=4)
+        return ({"error": "Unable to save user feedback"}), 500
 
-        capture_data = urlopen(capture_data_url).read()
-        capture_filename = os.path.join(report_folder, report['captureFilename'])
-        with open(capture_filename, 'wb') as f:
-            f.write(capture_data)
-    else:
-        current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        report_folder = os.path.join('reports', current_datetime)
-        os.makedirs(report_folder, exist_ok=True)
-        report_filename = os.path.join(report_folder, 'report.json')
-        with open(report_filename, 'w') as f:
-            json.dump(issue_report, f, indent=4)
-
-    return jsonify({'message': 'Issue reported successfully'})
+    return jsonify({"error": "Missing key userMessage."}), 400
 
 
 if __name__ == '__main__':

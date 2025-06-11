@@ -1,100 +1,144 @@
 /* Main modal container*/
-.container {
-    display: flex;  
-    justify-content: flex-end;
-  }
-  /* Recommendation boxes inside modal*/
-  .box {
-    position: relative;
-    width:  100%;
-    max-height: 40px;
-    /* ACCESS Color*/
-    background-color: #1a5b6e;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    margin-right: 10px;
-    overflow: hidden;
-    display:  flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    /* Transitions for expanding the boxes*/
-    transition:  height 0.3s ease-in-out;
-    transition:  max-height 0.3s ease-in-out;
-    /* ACCESS Color*/
-    border: 4px solid #48c0b9;
-    color: #ffffff;
-  }
-  /* Caret on recommendation boxes to indicate expanded or not */
-  .caret {
-    position: absolute;
-    top: 0px;
-    right: 10px;
-    font-size: 24px;
-    color: #000;
-    transition: transform 0.3s ease;
-    font-size:  24 px;
-    color:  #000;
-  }
-  /* Content of recommendation boxes*/
-  .box-content {
-    position: relative;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding-left:  5px;
-  }
-  /* Title of recommendation boxes*/
-  .box-title {
-    margin: 0;
-    color: #ffffff;
-    text-align: left;
-    margin-bottom: 10px;
-  }
-  
-  /* Rotates the caret upon the recommendation box being expanded*/
-  .box.expand .caret {
-    transform: rotate(180deg);
-  }
-  
-  /* Reason tags inside of recommendation boxes (expanded)*/
-  .tag {
-    display: inline-block;
-    padding: 5px 10px;
-    /* ACCESS color*/
-    background-color: #f07537;
-    color: #000000; /* Set text color to white for better visibility */
-    border-radius: 10px;
-    margin-right: 5px;
-  }
 
-  /* Container of all the reason tags*/
-  .tags-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: flex-start;
-    margin-top: 10px;
-  }
 
-  /* Container of all the text and tags inside recommendation boxes*/
-  .body-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-    margin-top: 10px;
-    color: #ffffff;
-  }
+.reason {
+  border-color: var(--secondary-color-3);
+  border-style: solid;
+  font-size: 16px;
+  color: var(--secondary-color-3);
+  border-radius: 0;
+  border-width: 1px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
 
-  .body-container a {
-    color: #ffffff;
-    position: right;
-    font-weight: bold;
-  }
+.reasons-container {
+  padding-bottom: 10px;
+}
 
-  .modal-darkened {
-    opacity: 0.5;
-    pointer-events: none;
-  }
+a {
+  font-size: 18px;
+  font-weight: bold;
+  text-decoration: underline;
+  color: var(--secondary-color-3);
+  margin-right: 15px;
+}
+
+a:hover {
+  color: var(--primary-color-1);
+  cursor: pointer;
+}
+
+
+
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #000;
+}
+
+.separator:not(:empty)::before {
+  margin-right: .25em;
+}
+
+.separator:not(:empty)::after {
+  margin-left: .25em;
+}
+
+
+.xdmod-data {
+  border-color: var(--secondary-color-3);
+  border-style: solid;
+  font-size: 16px;
+  padding-top: 2px;
+  padding-right: 2px;
+  padding-left: 2px;
+  padding-bottom: 2px;
+  color: var(--secondary-color-3);
+  border-radius: 0;
+  border-width: 1px;
+  margin-right: 10px;
+}
+
+/* modified bootstrap classes */
+
+.modal {
+  --bs-modal-border-radius: 10px;
+  --bs-modal-header-border-width: 0px;
+  --bs-modal-footer-border-width: 0px;
+  --bs-modal-width: 600px;
+}
+
+.modal-title {
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 22px;
+  color: var(--primary-color-1);
+}
+
+.modal-body{
+  font-size: 16px;
+  line-height: 20px;
+  background-color: #ffffff;
+  padding-bottom: 0px;
+}
+
+.modal-footer {
+  justify-content: flex-start;
+}
+
+.btn-close {
+  margin: 0;
+  opacity: 1;
+  margin-bottom: 10px;
+}
+
+
+.accordion-item {
+  margin-bottom: 10px;
+}
+
+.accordion-button {
+  background-color: var(--primary-color-4);
+}
+
+.accordion-button.collapsed::after{
+  content: "\F229";
+  font-family: bootstrap-icons;
+  background-image: none;
+}
+
+.accordion-button:not(.collapsed){
+  color: black;
+  background-color: var(--primary-color-4);
+  box-shadow: none;
+
+}
+.accordion-button:not(.collapsed)::after{
+  content: "\F235";
+  font-family: bootstrap-icons;
+  background-image: none;
+  transform: none;
+}
+
+.modal-see-more {
+  font-weight: 600;
+  font-size: 20px;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  padding-right: 2rem;
+  padding-left: 2rem;
+}
+
+.blurb {
+  font-size: 18px;
+}

@@ -11,3 +11,5 @@ formInfo.log
 queryInfo.log
 reports/
 app/reports
+app/models/sqlite_db_backup.db
+feedback/

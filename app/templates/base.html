@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google Tag Manager for ACCCESS website tracking-->
+    <script>
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-5XV3K7T');
+    </script>
+    <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image" href="../static/ACCESS_logo.png">
     {% block styles %}
         <!-- Bootstrap -->
-        <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css'>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
         <!-- jQuery UI -->
         <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
         <!-- CSS file -->
@@ -21,56 +31,47 @@
         {% endblock %}
     </title>
 </head>
-<body id="body" style="display: flex; flex-direction: column; min-height: 100vh;">
-    <div style="flex: 1;">
-        {%block content%}
+<body>
+    <!-- Google Tag Manager (noscript) for ACCESS website tracking-->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5XV3K7T" height="0" width="0" style="display:none;visibility:hidden">
+        </iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    {%block content%}
+        {%include 'nav.html'%}
+        <br>
+        <div class="container">
+            <div class="col">
+                <div id="alert-div"></div>
+            </div>
+            <br>
+            {%block name%}
+                <h1>The ACCESS Resource Advisor</h1>
+            {%endblock%}
+            <br>
+            <p class="intro">
+                Need help selecting an ACCESS resource for your research? <br>
+                These questions will help guide you to recommended resources.
+            </p>
             <div>
-                <nav>
-                    {%include 'nav.html'%}
-                </nav>
+                {%block app_content%}
+                    {% include "questions.html"%}
+                {%endblock%}
             </div>
-            <br>
-            <div class="container justify-content-center">
-                <div class="row justify-content-center" style="height: auto;">
-                    <div class="col">
-                        <div id="alert-div"></div>
-                    </div>
-                    <div class="w-100"></div>
-                    <div class="row justify-content-center">
-                        <div class="col justify-content-center">
-                            {%block page_title %}
-                                {#page title is added here#}
-                            {% endblock%}
-                        </div>
-                    </div>
-                    <div class="row justify-content-end">
-                        <div class="col-1 text-right">
-                            {%include 'reportBtns.html'%}
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        {%block app_content%}
-                            {#application content is added here#}
-                        {%endblock%}
-                    </div>
-                </div>
-            </div>
-            <br>
+        </div>
+        <br>
         {%endblock%}
-    </div>
-    <div>
-        {% include 'footer.html'%}
-    </div>
+    {% include 'footer.html'%}
 </body>
 
 
 {% block scripts %}
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
-    <!-- Popper -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <!-- Bootstrap -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha256-CjSoeELFOcH0/uxWu6mC/Vlrc1AARqbm/jiiImDGV3s=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
     <!-- jQuery UI -->
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <!-- Tagify-->

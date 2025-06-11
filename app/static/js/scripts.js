@@ -1,20 +1,40 @@
-//Import tagify objects for event listeners     
+//Import tagify objects for event listeners
 import { fieldTagify, softwareTagify,
-        addFieldTagify, addSoftwareTagify,
-        fieldInWhitelist, softwareInWhitelist } from "./tags.js";
+        initTagify, fieldInWhitelist, softwareInWhitelist } from "./tags.js";
 
-import {header, siteMenus, footer, footerMenus, universalMenus} from "https://esm.sh/@access-ci/ui@0.3.1"
+import {header, siteMenus, footer, footerMenus, universalMenus} from "https://esm.sh/@access-ci/ui@0.8.0"
 
 import { showAlert } from './alerts.js';
-
-import { reportingIssue } from "./issueReporting.js";
 
 const siteItems =[
     {
         name: "Software Documentation Service",
         href: "https://access-sds.ccs.uky.edu:8080/"
+    },
+    {
+        name: "Events & Training",
+        href: "https://support.access-ci.org/events"
+    },
+    {
+        name: "Resources",
+        href: "https://allocations.access-ci.org/resources"
+    },
+    {
+        name: "Prepare Requests",
+        href: "https://allocations.access-ci.org/prepare-requests"
+    },
+    {
+        name: "Exchange Credits",
+        href: "https://allocations.access-ci.org/exchange_calculator"
     }
 ]
+
+var { addFieldTagify, addSoftwareTagify } = initTagify()
+
+// Enable all bootstrap tooltips
+var tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+var tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
 
 $(document).ready(function(){
     $('html,body').animate({scrollTop:0},'fast')
@@ -37,6 +57,7 @@ $(document).ready(function(){
 
     footerMenus({
         items: siteItems,
+        siteName: "Support",
         target: document.getElementById("footer-menus"),
     });
     footer({ target: document.getElementById("footer") });
@@ -49,84 +70,86 @@ $(document).ready(function(){
     //event listeners for tagify fields
     addFieldTagify.on("invalid", fieldInWhitelist)
 
-    //softwareTagify.on("invalid", showAddSoftware);
     addSoftwareTagify.on("invalid", softwareInWhitelist);
 
     //initialize tooltips
     $('[data-toggle="tooltip"]').tooltip()
 
-    // calculate scores when the form is submitted
     var formDataObject = {};
-    $("#submit-form").on("click", function(){
+    var recommendationObj;
+    var recommendedResources;
+    $("#submit-form").on("click", function(e){
+        // calculate scores when the form is submitted
+        e.preventDefault();
         var form = document.getElementById("recommendation-form")
-        let formIsValid = validateForm() 
-        if (formIsValid){
-            let formData = get_form_data(form);
-            calculate_score(formData).then(function(recommendation){
-                if (!(recommendation === "{}")){
-                    display_score(recommendation);
-                    // Creates the boxes for the top 3 recommendations in the modal
-                    visualize_recommendations(recommendation, 3);
-                    openModal(recommendation);
-                    $("#see_less").hide()
-                    // Saves the form data so that it can be used in the "See More" button below.
-                    formDataObject = formData
-                }else{
-                    let alertMsg = "Not enough information to make recommendation. Please provide a more detailed response"
-                    showAlert(alertMsg, 'danger')
-                }
-            }).catch(function(error){
-                console.log("error when calculating score: ", error)
-            })
-        }
-        else
-        {
-            let alertMsg = "Please fill out all of the required fields"
-            showAlert(alertMsg, 'danger')
-        }
+        let formData = get_form_data(form);
+        calculate_score(formData).then(function(recommenadtion) {
+            recommendationObj = JSON.parse(recommenadtion)
+            recommendedResources = getRecommendedResources(recommendationObj);
+            if (!(Object.keys(recommendedResources).length === 0)){
+                // Creates the accordions for the top 3 (or fewer) recommendations in the modal
+                visualize_recommendations(recommendedResources, Math.min(3, Object.keys(recommendedResources).length));
+                $("#submitModal").modal("show");
+                $("#see_less").hide()
+                $("#see_more").show()
+                // Saves the form data so that it can be used in the "See More" button below.
+                formDataObject = formData
+            }else{
+                let alertMsg = "Not enough information to make recommendation. Please provide a more detailed response"
+                showAlert(alertMsg, 'danger')
+            }
+            show_xdmod_data();
+
+        });
+
         return false
     })
 
     //add three more calculated scores when see more button is clicked
     $('#see_more').on('click', function(){
-        // load the form data from the original submition
-        let formData = formDataObject
-        // Reads the number of boxes/recommendations in the modal to only load the subsequent three
-        var numberOfBoxes = $("#submitModalBody .box").length;
-        calculate_score(formData).then(function(recommendation){
-                
-            if (!(recommendation === "{}")){
-                // Makes the next three boxes/recommendations and adds to the modal  
-                visualize_recommendations(recommendation, numberOfBoxes+3)
-                .then(() => {
-                })
-                .catch((error) => {
-                    console.error("Error occurred: " + error);
-                    // Hide the "See More" button and show the "See Less" when all recommendations have been displayed
-                    $("#see_more").hide()
-                    $("#see_less").show()   
-                });       
-            }   
-            }).catch(function(error){
-                console.log("error when calculating score: ", error)
-            })
-        })    
-        
+
+        // Reads the number of recommendations in the modal to only load the subsequent three
+        let numberOfAccordions = $("#submitModalBody .accordion-item").length;
+        let numRecs = Object.keys(recommendedResources).length
+        let newAccordions = Math.min(numRecs, numberOfAccordions + 3);
+
+        // Makes the next set of  boxes/recommendations and adds to the modal
+        visualize_recommendations(recommendedResources, newAccordions)
+        .then(() => {
+
+            // Hide the "See More" button and show the "See Less" when all recommendations have been displayed
+            if (newAccordions >= numRecs){
+                $("#see_more").hide();
+                $("#see_less").show();
+            }
+
+            show_xdmod_data();
+
+        })
+        .catch((error) => {
+            console.error("Error occurred: " + error);
+        });
+    });
+
     // Reduce the recommendations back down to the top three
     $('#see_less').on('click', function(){
-        // load the form data from the original submition
-        let formData = formDataObject
-        // Clears the modal
-        document.querySelector('#submitModalBody').innerHTML = '';
+        // Clears the accordion
+        document.querySelector('#recommendation-accordion').innerHTML = '';
         //Calculates the top three and displays them in the modal
-        calculate_score(formData).then(function(recommendation){
-            if (!(recommendation === "{}")){
-                visualize_recommendations(recommendation, 3);
-                $("#see_more").show()
-                $("#see_less").hide()
-                }
+        visualize_recommendations(recommendedResources, Math.min(3, Object.keys(recommendedResources).length)).then( () => {
+            $("#see_more").show()
+            $("#see_less").hide()
+            show_xdmod_data();
+        })
+        .catch((error) => {
+            console.error("Error occured when trying to show fewer recommendations: ", error);
+        })
     })
-})
+
+    $("#submitModal").on('hidden.bs.modal', function() {
+        // make sure the recommendations are empty
+        $("#recommendation-accordion").empty()
+    })
 
     //Show RPs if user has experience
     $('input[name="hpc-use"]').change(function() {
@@ -151,71 +174,128 @@ $(document).ready(function(){
         if ($(this).val() === '1') {
           $('.hide-data').removeClass('d-none').show();
         } else if ($(this).val() === '2') {
-           $('.hide-data').removeClass('d-none').show(); 
+           $('.hide-data').removeClass('d-none').show();
         } else {
             $('.hide-data').addClass('d-none').hide();
         }
       });
 
-    $("#submitModal").on('hidden.bs.modal',function(e){
-        $("#submitModalBody").empty();
-
-    })
+    //Show gpu questions if user needs gpus
+    $('input[name="gpu"]').change(function() {
+        if ($(this).val() === '1') {
+            $('.hide-gpu').removeClass('d-none').show();
+        } else if ($(this).val() === '2') {
+            $('.hide-gpu').removeClass('d-none').show();
+        } else {
+            $('.hide-gpu').addClass('d-none').hide();
+        }
+        });
 
     // Clear the form
     $("#clear-form").on('click',function(){
         let form = document.getElementById("recommendation-form");
         form.reset();
-    })
-    $("#clear-form-modal").on('click',function(){
-        let form = document.getElementById("recommendation-form");
-        form.reset();
-    })
+        // Hide all expanded items
+        $('*[class*="hide-"]').addClass('d-none').hide();
+
+    });
 
 });
 
-
-function validateForm() {
-    var valid = 1;
-
-    //Find elements based on required attribute
-    var reqFields = $("[required]")
-
-    reqFields.each(function(){
-        //Find name for those elements
-        var name = $(this).attr("name");
-
-        //Find values from those names if name exists, otherwise
-        //directly check value. If value on required question is
-        //undefined, set valid to 0 and display error message.
-        if (name){
-            if ($(`input[name=${name}]:checked`).val() == undefined){
-                valid = 0;
-                $(`[name=${name}]`).addClass("is-invalid")
-            }else{
-                $(`[name=${name}]`).removeClass("is-invalid")
+async function get_xdmod_data(){
+    return new Promise(function(resolve,reject){
+        $.ajax({
+            type:"POST",
+            url:"/get_xdmod_data",
+            contentType:"application/json",
+            success:function(recommendation){
+                resolve(recommendation)
+            },
+            error:function(error){
+                reject(error)
             }
-         }else{
-            if (!$(this).val()){
-                valid = 0;
-                $(this).addClass("is-invalid")
-            }else{
-                $(this).removeClass("is-invalid")
-            }
-        }
+        });
     });
-
-    return valid;
 }
 
-function display_score(score){
-    $("#rpScore").append(
-        $(`
-            <label class="form-check-label text-wrap" for=""> 
-                ${score}
-            </label>`
-        )
-        )
+function convert_hours(hours){
+    // Convert to days if 24 or more hours
+    if (hours >= 24) {
+        const days = Math.round(hours / 24 * 100) / 100; // Maintain 2 decimal places
+        return days === 1 ? "1 day" : `${days} days`;
+    }
+
+    // Convert to minutes if less than 1 hour
+    if (hours < 1) {
+        const minutes = Math.round(hours * 60);
+        return minutes === 1 ? "1 min." : `${minutes} mins.`;
+    }
+
+    // Keep as hours otherwise
+    return hours === 1 ? "1 hour" : `${hours} hrs.`;
+}
+
+var xdmodData;
+function show_xdmod_data(){
+    // Create and return a Promise (to avoid turning everything into async)
+    const dataPromise = (typeof xdmodData === 'undefined')
+        ? get_xdmod_data().then(data => { xdmodData = JSON.parse(data); })
+        : Promise.resolve();
+    dataPromise.then(() => {
+        const accordionItems = $(".accordion-item");
+        let xdmodResources  = Object.keys(xdmodData)
+        accordionItems.each(function() {
+            const id = $(this).attr("id");
+            if (id) {
+                let resource = id.split('-').slice(0,-1)
+                if (resource.length > 1) {
+                    resource = resource.join("-")
+                } else {
+                    resource = resource[0]
+                }
+
+                let time;
+                if (resource === 'Anvil') {
+                    time = `Anvil CPU: ${convert_hours(xdmodData['Anvil_CPU'])}`
+                    time = time.concat(`, Anvil GPU: ${convert_hours(xdmodData['Anvil_GPU'])}`)
+                } else {
+                    time = convert_hours(xdmodData[resource]);
+                }
+
+                if (xdmodResources.includes(resource) && $(`#${resource}-accordion-button`).has('.xdmod-data').length == 0){
+                    $(`#${resource}-accordion-button`).append(`
+                        <span
+                            class="xdmod-data"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="Average time jobs spend in queue before starting to run (past 30 days): ${time}"
+                        >
+                            <i class="icon bi bi-hourglass-split"></i>
+                        </span>
+                    `)
+                }
+
+                // Add time specifically for ANVIL CPU and GPU resources.
+                if ((resource === 'Anvil') && (xdmodResources.includes('Anvil_CPU') && $(`#${resource}-accordion-button`).has('.xdmod-data').length == 0)) {
+                    console.log(resource)
+                    $(`#${resource}-accordion-button`).append(`
+                        <span
+                            class="xdmod-data"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="Average time jobs spend in queue before starting to run (past 30 days): ${time}"
+                        >
+                            <i class="icon bi bi-hourglass-split"></i>
+                        </span>
+                    `)
+                }
+            }
+        });
+        // enable newly created tooltips
+        tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+    }).catch(error => {
+        console.error("Unable to find xdmod data:", error);
+    });
 }
 
 function get_form_data(form){
@@ -224,14 +304,10 @@ function get_form_data(form){
     //Set research field tags and added tags
     let fieldTagValues = fieldTagify.value.map(tag => tag.value)
     formData.set('research-field', fieldTagValues)
-    let fieldAddTags = addFieldTagify.value.map(tag => tag.value)
-    formData.set('add-field-tags', fieldAddTags)
 
     //Set software tags and added tags
     let softwareTagValues = softwareTagify.value.map(tag => tag.value)
     formData.set('software', softwareTagValues)
-    let softwareAddTags = addSoftwareTagify.value.map(tag => tag.value)
-    formData.set('add-software-tags', softwareAddTags)
 
     return formData
 }
@@ -241,7 +317,7 @@ function calculate_score(formData){
     // get and process data from each input field
     let jsonData = {}
     formData.forEach(function(value,key){
-        if (key == "used-hpc" || key == "used-gui"){
+        if (key == "used-hpc" || key == "used-gui" || key == "gpus" || key == "gpus_ram"){
             if (!jsonData[key]) {
                 jsonData[key] = [value];
             } else {
@@ -266,20 +342,109 @@ function calculate_score(formData){
                 reject(error)
             }
         });
-    }); 
-       
+    });
+
+}
+
+function getRecommendedResources(recommenadtionObj, threshold = 1) {
+    // returns only the objects that have a score (i.e. are recommended)
+    return Object.fromEntries(
+      Object.entries(recommenadtionObj)
+        .filter(([_, value]) => value.score >= threshold)
+    );
+}
+
+async function addAccordion(recommendation) {
+    const display_name = recommendation.name
+    let resource;
+    if (display_name.includes(" ")) {
+        resource = display_name.replaceAll(" ","-");
+    } else {
+        resource = display_name
+    }
+    let recommendation_accordion = $("#recommendation-accordion");
+    let recommendation_reasons = "";
+
+    // let reason = recommendations[i].reasons;
+    if (recommendation.reasons) {
+        recommendation.reasons.forEach((r) => {
+            recommendation_reasons += `
+                <span class="reason badge">
+                    ${r}
+                </span>
+            `;
+        })
+    }
+
+    let accordion_item = `
+        <div class="accordion-item border-0" id="${resource}-accordion">
+        <h2 class="accordion-header" id="${resource}-header">
+            <button class="accordion-button collapsed justify-content-between d-flex" type="button" data-bs-toggle="collapse"
+            data-bs-target="#${resource}-collapse" aria-expanded="false"
+            aria-controls="${resource}-collapse">
+                <div class="d-flex justify-content-between w-100" id="${resource}-accordion-button">
+                    <strong flex-grow-1>${display_name}</strong>
+                </div>
+            </button>
+        </h2>
+        <div id="${resource}-collapse" class="accordion-collapse collapse"
+            aria-labelledby="${resource}-header">
+            <div class="accordion-body">
+            <div id='${resource}-content'>
+                <div class="reasons-container" id="${resource}-reasons">
+                    ${recommendation_reasons}
+                </div>
+                <div class="body-container" id="${resource}-body"></div>
+            </div>
+            </div>
+        </div>
+        </div>
+    `;
+
+    recommendation_accordion.append(accordion_item);
+
+    //Generates blurbs and links for each RP by pulling from database
+    try {
+        // Make the AJAX request to info/blurb database using fetch API and await the response
+        const jsonData = { rp: recommendation.name };
+        const response = await $.ajax({
+            type: "POST",
+            url: '/get_info',
+            data: JSON.stringify(jsonData),
+            contentType: "application/json",
+            error:function(error){
+                reject(error)
+            }
+        });
+        // takes the JSON response and uses it to add the blurbs and links into the recommendations boxes
+        const info = await response;
+        const bodyContainer = document.getElementById(`${resource}-body`);
+        if (bodyContainer) {
+            const blurbArray = info.blurb;
+            const hyperlinkArray = info.hyperlink;
+            const documentationArray = info.documentation;
+            const index = info.rp.indexOf(recommendation.name);
+            bodyContainer.innerHTML = bodyContainer.innerHTML + `
+                <p class="blurb">${blurbArray[index]}</p>
+                <a href="${hyperlinkArray[index]}" target="_blank">Resource Page</a>
+                <a href="${documentationArray[index]}" target="_blank">Documentation</a>
+            `;
+        }
+      } catch (error) {
+        // Handle any other errors that might occur during the AJAX request
+        console.error("Error fetching RP information:", error);
+      }
 }
 
 //function to parse JSON data a create a boxes in the modal to display them
 async function visualize_recommendations(scores, recNum){
     // parses JSON data from calculate scores function
-    var parsedScores = JSON.parse(scores);
     var recommendations=[];
     //Creates a variable recommendations that houses the parsed JSON data
-    for (var rp in parsedScores) {
-        if (parsedScores.hasOwnProperty(rp)) {
-            var score = parsedScores[rp]['score'];
-            var reasons = parsedScores[rp]['reasons'];
+    for (let rp in scores) {
+        if (scores.hasOwnProperty(rp)) {
+            var score = scores[rp]['score'];
+            var reasons = scores[rp]['reasons'];
             recommendations.push({ name: rp, score: score, reasons: reasons });
         }
     }
@@ -288,100 +453,17 @@ async function visualize_recommendations(scores, recNum){
         return b.score - a.score;
     });
     // takes recNum argument to make params that only display a certain section of recommendations. Used for "See More" button
-    var low = recNum-3
     var high = recNum
-    for (let i=low; i<(high); i++){
-        //Make a box to hold all of the info for each RP
-        var box = document.createElement('div');
-        box.classList.add('box');
-        box.id = `box${i}`;
-        box.innerHTML = box.innerHTML +`
-            <div class="box-content" id='box${i}-content'>
-            <h3 class="box-title" id="box${i}-name">${recommendations[i].name}</h3>
-            <div class="tags-container" id="box${i}-suitability">
-            <h4 class="tags-title"></h4>
-            </div>
-            <div class="body-container" id="box${i}-body"></div>
-            </div>
-            <span class="caret"><i class="fas fa-caret-down"></i></span>
-            `;
-        var body = document.querySelector('#submitModalBody')
-        // Add the recommendation box to the modal body
-        body.appendChild(box);
+    for (let i=0; i<(high); i++){
 
-        //Generate "reason" tags for inside the boxes. These tags are the reasons for the recommendation
-        var tagsContainer = document.getElementById(`box${i}-suitability`);
-        if (tagsContainer) {
-            var tags = recommendations[i].reasons;
-            // creates the individual reason rtags
-            if (tags) {
-                tags.forEach(function(tag) {
-                var tagElement = document.createElement('div');
-                tagElement.classList.add('tag');
-                tagElement.textContent = tag;
-                tagsContainer.appendChild(tagElement);
-                });
-            }
-        }
-        
-        //Generates blurbs and links for each RP by pulling from database
-        try {
-            // Make the AJAX request to info/blurb database using fetch API and await the response
-            const jsonData = { rp: recommendations[i].name }; 
-            const response = await $.ajax({    
-                type: "POST",
-                url: '/get_info',
-                data: JSON.stringify(jsonData),
-                contentType: "application/json",
-                error:function(error){
-                    reject(error)
-                }
-            });
-            // takes the JSON response and uses it to add the blurbs and links into the recommendations boxes
-            const info = await response;
-            const bodyContainer = document.getElementById(`box${i}-body`);
-            if (bodyContainer) {
-                const blurbArray = info.blurb;
-                const hyperlinkArray = info.hyperlink;
-                const documentationArray = info.documentation;
-                const index = info.rp.indexOf(recommendations[i].name);
-                bodyContainer.innerHTML = bodyContainer.innerHTML + `
-                    <p class="box-text">${blurbArray[index]}</p>
-                    <a class="box-link" href="${hyperlinkArray[index]}" target="_blank">Brief Summary</a>
-                    <a class="box-link" href="${documentationArray[index]}" target="_blank">Detailed Information</a>
-                `;
-            }
-          } catch (error) {
-            // Handle any other errors that might occur during the AJAX request
-            console.error("Error fetching RP information:", error);
-          }
-    }
-}
-//function to show modal upon clicking submit button
-function openModal() {
-    $("#submitModal").modal("show");
-}
-// Waits for the user to click on a modal box and expands/shrinks upon click. Height is relative to the length of the info inside the body
-$("#submitModalBody").on('click',function(event){
-    if (!reportingIssue){
+        let resource = recommendations[i].name;
+        let accordion_item = $(`#${resource}-accordion`);
 
-        var target = event.target;
-        var box = target.closest('.box');
-        if (box) {
-            var content = box.querySelector('.body-container');
-            var tags = box.querySelector('.tags-container');
-            // If the box is already open
-            if (box.style.maxHeight){
-                box.style.maxHeight = null;
-                box.classList.toggle('expand');
-            }
-            // If the box is not already open
-            else{
-                var textHeight = content.clientHeight;
-                var tagHeight = tags.clientHeight;
-                box.style.maxHeight = (parseInt(textHeight) + parseInt(tagHeight) + 90 + "px");
-                box.classList.toggle('expand');
-            }
+        // If the recommenadtion item already exists then skip it
+        if (accordion_item.length > 0) {
+            continue;
         }
+        addAccordion(recommendations[i])
     }
-})
+
+}

@@ -1,7 +1,6 @@
 from models.rps import RPS
 from models.rpMemory import RpMemory
 from logic.research import get_research_fields
-from logic.jobClass import get_job_classes
 from logic.softwares import get_softwares 
 from logic.gui import get_guis
 from confluence.confluenceAPI import ConfluenceAPI
@@ -80,13 +79,6 @@ def get_rp_data_tables(rpNamesList):
                       'Suitability':[field.suitability for field in researchFields]
                       }
         df = pd.DataFrame(data=rpResearch)
-        tablesDict[rpName].append(df)
-
-        # job class information
-        jobClasses = get_job_classes(rpName)
-        rpJob = {'Job Class': [jobClass.job_class.class_name for jobClass in jobClasses],
-                 'Suitability':[jobClass.suitability for jobClass in jobClasses]}
-        df = pd.DataFrame(data=rpJob)
         tablesDict[rpName].append(df)
 
     return(tablesDict)

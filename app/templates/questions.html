@@ -9,50 +9,33 @@
 {% endblock %}
 
 {%block page_title %}
-<h4 style="text-align:center;">ACCESS Resource Advisor</h4>
 {% endblock %}
 {% block app_content %}
-<form class="needs-validation" id="recommendation-form"  novalidate>
-    <div class="">
-        <label style="font-size: 0.8em;">
-            <span style="color:#FF0000;">Disclaimer: </span>
-            This tool is a prototype designed to help researchers (in particular new users) find appropriate infrastructure for their research. 
-            The term “supercomputer” refers to any substantial computation system or computing resource such as a computing cluster, cloud platform, large server system or high-performance computer.        
-        </label>   
-        </div>
-    <div style="color:#FF0000;">
-        <label style="font-size: 0.8em;">Required questions are marked with an asterisk (*)</label>
-    </div> 
-        <!-- HPC USE -->
-    
+<form id="recommendation-form">
+    <!-- HPC USE -->
     <div class="form-group">
-        <label>Have you used a supercomputer before? <span style="color:#FF0000;">*</span></label>
+        <label class="question">Have you used a supercomputer* before?
+            <i
+                class="bi bi-info-circle"
+                data-bs-toggle="tooltip"
+                data-bs-title="*Supercomputer refers to any substantial compuing system or resource, including clusters, cloud platforms, large server systems, or high-performace computers"
+            ></i>
+        </label>
+
         <br>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="hpc-use" id="has-used-hpc" value="1" required>
+            <input class="form-check-input" type="radio" name="hpc-use" id="has-used-hpc" value="1">
             <label class="form-check-label" for="has-used-hpc">Yes</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="hpc-use" id="has-not-used-hpc" value="0" required>
+            <input class="form-check-input" type="radio" name="hpc-use" id="has-not-used-hpc" value="0">
             <label class="form-check-label" for="has-not-used-hpc">No</label>
         </div>
     </div>
-        <!-- Familiarity with ACCESS HPCs -->
-    <div class="form-group hide-hpc d-none">
-        <label > Are you familiar with any of the resource providers available to ACCESS?</label>
-        <br>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="access-familiarity" id="is-familiar" value="1">
-            <label class="form-check-label" for="is-familiar">Yes</label>
-        </div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="access-familiarity" id="is-not-familiar" value="0">
-            <label class="form-check-label" for="is-not-familiar">No</label>
-        </div>
-    </div>
-        <!-- Previously used ACCESS HPCs -->
+
+    <!-- Previously used ACCESS HPCs -->
     <div class="form-group hide-hpc d-none" id="access-rps">
-        <label >Select any supercomputers you have experience with:</label>
+        <label class="question">Select any supercomputers you have experience with:</label>
         {% for rp in rps %}
         <div class="form-check">
             <input class="form-check-input used-rps" name="used-hpc" type="checkbox" id="{{rp.name}}-option-rp" value="{{rp.name}}">
@@ -60,9 +43,10 @@
         </div>
         {%endfor%}
     </div>
-        <!-- Experience using HPC -->
+
+    <!-- Experience using HPC -->
     <div class="form-group hide-hpc d-none">
-        <label >How much experience do you have with supercomputers?</label>
+        <label class="question">How much experience do you have with supercomputers?</label>
         <br>
         <div class="form-check">
             <input class="form-check-input" type="radio" name="hpc-experience" id="one-year" value="0-1 year">
@@ -77,21 +61,22 @@
             <label class="form-check-label" for="four-years">I am an expert when it comes to using HPCs (4 or more years)</label>
         </div>
     </div>
+
     <!-- GUI Use -->
     <div class="form-group">
-        <label>Do you need to use a resource that has a user-friendly interface?
-            <button type="button" class="btn btn-link" data-toggle="tooltip" id ="UI-tip" title="A user interface (UI) allows users to control complex operations via user-friendly tools rather than the command line. Recommended for new users.">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                </svg>
-                </button>
+        <label class="question">Do you need to use a resource that has a user-friendly interface?
+                <i
+                    class="bi bi-info-circle"
+                    data-bs-toggle="tooltip"
+                    data-bs-title="A graphical user interface (GUI) allows users to control complex operations via user-friendly tools rather than the command line. Recommended for new users."
+                ></i>
         </label>
-        <div class="form-check">
+        <br>
+        <div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="gui-needed" id="need-gui" value="1">
             <label class="form-check-label" for="need-gui">Yes</label>
         </div>
-        <div class="form-check">
+        <div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="gui-needed" id="no-need-gui" value="0">
             <label class="form-check-label" for="no-need-gui">No</label>
         </div>
@@ -106,46 +91,39 @@
         </div>
         {%endfor%}
     </div>
-        <!-- Field of Research -->
+
+    <!-- Field of Research -->
     <div class="form-group">
-        <label for="">What is the general field(s) of research your computational work pertains to?</label>
+        <label class="question">Select your field(s) of research</label> <br>
         <input class="" type="text" id="field-text-input">
     </div>
+
+    <!-- Data Storage -->
     <div class="form-group">
-        <label for="field-add-tag">Add other research fields if necessary: </label>
-        <input class="" id="field-add-tag" type="text">
-    </div>
-        <!-- Data Storage -->
-    <div class="form-group">
-        <label >Do you need to store any data on the supercomputer? <span style="color:#FF0000;">*</span></label>
+        <label class="question">Do you need to store any data on the supercomputer?</label>
         <br>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="storage" id="storage-needed" value="1" required>
+            <input class="form-check-input" type="radio" name="storage" id="storage-needed" value="1">
             <label class="form-check-label" for="storage-needed">Yes</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="storage" id="storage-not-needed" value="0" required>
+            <input class="form-check-input" type="radio" name="storage" id="storage-not-needed" value="0">
             <label class="form-check-label" for="storage-not-needed">No</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="storage" id="storage-unsure" value="2" required>
-            <label class="form-check-label" for="storage-unsure">I don't know</label> 
+            <input class="form-check-input" type="radio" name="storage" id="storage-unsure" value="2">
+            <label class="form-check-label" for="storage-unsure">I don't know</label>
         </div>
     </div>
-        <!-- File count -->
+
+    <!-- Long-Term Storage -->
     <div class="form-group hide-data d-none">
-        <label for="file-count">How many files?</label>
-        <input class="form-control" type="number" id="file-count" name="num-files" >
-    </div>
-        <!-- Long-Term Storage -->
-    <div class="form-group hide-data d-none">
-        <label >Approximately how much long-term storage do you think you will need?
-            <button type="button" class="btn btn-link" data-toggle="tooltip" id ="long-term-storage-tip" title="Most resources allow a certain amount of files to be stored throughout the entire duration of an allocation in the home/project storage.">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                </svg>
-            </button>
+        <label class="question" >Approximately how much long-term storage do you think you will need?
+            <i
+                class="bi bi-info-circle"
+                data-bs-toggle="tooltip"
+                data-bs-title="Most resources allow a certain amount of files to be stored throughout the entire duration of an allocation in the home/project storage."
+            ></i>
         </label>
         <br>
         <div class="form-check form-check">
@@ -165,15 +143,15 @@
             <label class="form-check-label" for="unsure-tb">I don't know</label>
         </div>
     </div>
-        <!-- Temp Storage -->
+
+    <!-- Temp Storage -->
     <div class="form-group hide-data d-none">
-        <label >Approximately how much temporary storage do you think you will need (inputs and outputs)?
-            <button type="button" class="btn btn-link" data-toggle="tooltip" id ="temp-storage-tip" title="Most resources regularly purge temporary files. Read about scratch storage to learn more.">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                </svg>
-            </button>
+        <label class="question">Approximately how much temporary storage do you think you will need (inputs and outputs)?
+            <i
+                class="bi bi-info-circle"
+                data-bs-toggle="tooltip"
+                data-bs-title="Most resources regularly purge temporary files. Read about scratch storage to learn more."
+            ></i>
         </label>
         <br>
         <div class="form-check form-check">
@@ -193,9 +171,10 @@
             <label class="form-check-label" for="unsure-temp">I don't know</label>
         </div>
     </div>
-        <!-- Memory (RAM) -->
+
+    <!-- Memory (RAM) -->
     <div class="form-group">
-        <label >Approximately how much memory (RAM) does your job require?</label>
+        <label class="question">Approximately how much memory (RAM) does your job require?</label>
         <br>
         <div class="form-check form-check">
             <input class="form-check-input" type="radio" name="memory" id="sixtyfour-gb" value="less-than-64">
@@ -214,24 +193,21 @@
             <label class="form-check-label" for="unsure-gb">I don't know</label>
         </div>
     </div>
-        <!-- Software and Libraries -->
+
+    <!-- Software and Libraries -->
     <div class="form-group">
-        <label for="software-text-input">Which scientific libraries and software packages do you need for your job?</label>
+        <label for="software-text-input" class="question">Which scientific libraries and software packages do you need?</label>
         <input class="" type="text" id="software-text-input" name="software">
     </div>
+
+    <!-- Graphical -->
     <div class="form-group">
-        <label for="software-libraries-add-tag">Add other libaries and software tags if necessary:</label>
-        <input id="software-libraries-add-tag" class="" type="text">
-    </div>
-        <!-- Graphical -->
-    <div class="form-group">
-        <label >Is there a graphical component to your jobs?
-            <button type="button" display="inline-block" class="btn btn-link" data-toggle="tooltip" id ="graphical-tip" title="i.e. visualization, image generation, simulation, etc.">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                </svg>
-            </button>
+        <label class="question">Is there a graphical component to your jobs?
+            <i
+            class="bi bi-info-circle"
+            data-bs-toggle="tooltip"
+            data-bs-title="I.e. your jobs involve signifiacnt simulation and modeling."
+            ></i>
         </label>
         <br>
         <div class="form-check form-check-inline">
@@ -247,9 +223,10 @@
             <label class="form-check-label" for="unsure-graphical">I don't know</label>
         </div>
     </div>
-        <!-- GPU -->
+
+    <!-- GPU -->
     <div class="form-group">
-        <label >Does your application need to use GPUs?</label>
+        <label class="question">Do you need GPUs?</label>
         <br>
         <div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="gpu" id="gpu-needed" value="1">
@@ -264,10 +241,50 @@
             <label class="form-check-label" for="gpu-unsure">I don't know</label>
         </div>
     </div>
-    
-        <!-- Virtual Machine -->
+    <!-- List of GPUs on ACCESS -->
+    <div class="form-group d-none hide-gpu" id="access-gpus">
+        <label class="question">Select any GPUs you need:</label>
+        <div class="form-check">
+            <input class="form-check-input gpus" name="gpus" type="checkbox" id="gpu-idk-option" value="idk">
+            <label class="form-check-label" for="gpu-idk-option">I don't know</label>
+        </div>
+        {% for gpu in gpus %}
+            {% set gpu_name = gpu | replace(" ", "-")%}
+            <div class="row-6">
+                <div class="form-check form-check-inline col">
+                    <input
+                        class="form-check-input gpus"
+                        name="gpus" type="checkbox"
+                        id="{{gpu_name}}-option" value="{{gpu_name}}"
+                    >
+                    <label class="form-check-label" for="{{gpu_name}}-option">{{gpu}}</label>
+                </div>
+                    {% for item in gpus[gpu]%}
+                        {% if item > 0 %}
+                        <div class="form-check form-check-inline col">
+                            <input
+                                class="form-check-input gpus"
+                                name="gpus_ram" type="checkbox"
+                                id="{{gpu_name}}_{{item}}_option" value="{{gpu_name}}_{{item}}_option"
+                                >
+                            <label class="form-check-label" for="{{gpu_name}}_{{item}}_option">{{item}} GB</label>
+                        </div>
+                        {% endif %}
+                    {%endfor%}
+            </div>
+        {%endfor%}
+    </div>
+
+
+    <!-- Virtual Machine -->
     <div class="form-group">
-        <label >Does your program need to run on a virtual machine (VM)?</label>
+        <label class="question">Do you need a virtual machine (VM)?
+            <i
+            class="bi bi-info-circle"
+            data-bs-toggle="tooltip"
+            data-bs-title="Consider using a VM if your job must run continuously, as supercomputers typically limit jobs to fixed time durations."
+            ></i>
+        </label>
         <br>
         <div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" name="vm" id="vm-needed" value="1">
@@ -284,8 +301,8 @@
     </div>
 
     <!-- Submit button trigger modal-->
-    <button type="submit" class="btn btn-primary" id="submit-form">Submit</button>
-    <button type="button" class="btn btn-outline-danger" id="clear-form">Clear Form</button>
+    <button type="submit" class="primary-button" style="margin-right: 20px;  margin-top:20px;" id="submit-form">SEND</button>
+    <button type="button" class="secondary-button" style="margin-top:20px;" id="clear-form">CLEAR</button>
 </form>
 <br>
     {%include 'submitModal.html'%}
